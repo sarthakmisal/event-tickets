@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Event Tickets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Manrope:wght@400..800&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%234a3fe0%27/%3E%3Cpath d=%27M7 13a2 2 0 0 1 0 4v2h18v-2a2 2 0 0 1 0-4v-2H7z%27 fill=%27white%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><path d="M8 2v4M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4"/></symbol>
+  <symbol id="i-scan" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></symbol>
+  <symbol id="i-ticket" viewBox="0 0 24 24"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2M13 17v2M13 11v2"/></symbol>
+  <symbol id="i-rupee" viewBox="0 0 24 24"><path d="M6 3h12M6 8h12M6 13l8.5 8M6 13h3M9 13c6.667 0 6.667-10 0-10"/></symbol>
+  <symbol id="i-usercheck" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 11 2 2 4-4"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7M19 12H5"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8M21 3v5h-5M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16M8 16H3v5"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></symbol>
+  <symbol id="i-qr" viewBox="0 0 24 24"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3M21 21v.01M12 7v3a2 2 0 0 1-2 2H7M3 12h.01M12 3h.01M12 16v.01M16 12h1M21 12v.01M12 21v-1"/></symbol>
+  <symbol id="i-circle-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-circle-x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></symbol>
+</svg>
+
+<div class="login-wrap" id="login">
+  <form class="card login-card" id="login-form" novalidate>
+    <div class="brand" style="padding:0"><div class="mark"><svg class="ico"><use href="#i-ticket"/></svg></div><div><b style="color:var(--ink)">Event Tickets</b><small style="color:var(--muted)">Organiser panel</small></div></div>
+    <div><h1 style="font-size:26px">Sign in</h1><p class="sub">Use the email and password your admin gave you.</p></div>
+    <div class="field"><label for="l-email">Email</label><input type="email" id="l-email" autocomplete="username" placeholder="you@example.com"></div>
+    <div class="field"><label for="l-pass">Password</label><input type="password" id="l-pass" autocomplete="current-password"></div>
+    <p class="err" id="e-login" role="alert"></p>
+    <button class="btn primary" type="submit" style="height:48px">Sign in</button>
+  </form>
+</div>
+
+<div class="app" id="app">
+  <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+    <div class="brand">
+      <div class="mark"><svg class="ico"><use href="#i-ticket"/></svg></div>
+      <div><b id="org-name">Event Tickets</b><small>Organiser panel</small></div>
+    </div>
+    <nav class="nav">
+      <a class="nav-item" href="#overview" data-nav="overview"><svg class="ico"><use href="#i-grid"/></svg><span>Dashboard</span></a>
+      <a class="nav-item" href="#events" data-nav="events"><svg class="ico"><use href="#i-calendar"/></svg><span>Events</span></a>
+      <a class="nav-item" href="#team" data-nav="team"><svg class="ico"><use href="#i-users"/></svg><span>Team</span></a>
+      <a class="nav-item" href="#config" data-nav="config"><svg class="ico"><use href="#i-sliders"/></svg><span>Settings</span></a>
+      <div class="nav-label">Entry gate</div>
+      <a class="nav-item" href="#scanner" data-nav="scanner"><svg class="ico"><use href="#i-scan"/></svg><span>Open scanner</span></a>
+    </nav>
+    <div class="side-foot">
+      <div class="avatar" id="side-av" style="--h:255;--av-s:30%;--av-bl:24%;--av-fl:85%">?</div>
+      <div class="who"><b id="side-user">&nbsp;</b><small id="side-role">&nbsp;</small></div>
+      <button class="icon-btn" data-act="theme" aria-label="Switch theme" title="Switch theme"><svg class="ico theme-ico-light"><use href="#i-moon"/></svg><svg class="ico theme-ico-dark"><use href="#i-sun"/></svg></button>
+      <button class="icon-btn" data-act="logout" aria-label="Sign out" title="Sign out"><svg class="ico"><use href="#i-logout"/></svg></button>
+    </div>
+  </aside>
+  <div class="backdrop" data-act="closeMenu"></div>
+
+  <div>
+    <header class="topbar">
+      <button class="icon-btn" data-act="menu" aria-label="Open menu"><svg class="ico"><use href="#i-menu"/></svg></button>
+      <div class="mark"><svg class="ico"><use href="#i-ticket"/></svg></div>
+      <b>Event Tickets</b>
+      <button class="icon-btn" data-act="theme" aria-label="Switch theme"><svg class="ico theme-ico-light"><use href="#i-moon"/></svg><svg class="ico theme-ico-dark"><use href="#i-sun"/></svg></button>
+    </header>
+    <main class="main"><div class="view" id="view"></div></main>
+  </div>
+</div>
+
+<nav class="bottom-nav" aria-label="Quick navigation">
+  <a class="bn" href="#overview" data-nav="overview"><svg class="ico"><use href="#i-grid"/></svg>Home</a>
+  <a class="bn" href="#events" data-nav="events"><svg class="ico"><use href="#i-calendar"/></svg>Events</a>
+  <a class="bn scan-fab" href="#scanner" data-nav="scanner" aria-label="Open scanner"><span class="c"><svg class="ico"><use href="#i-scan"/></svg></span></a>
+  <a class="bn" href="#team" data-nav="team"><svg class="ico"><use href="#i-users"/></svg>Team</a>
+  <a class="bn" href="#config" data-nav="config"><svg class="ico"><use href="#i-sliders"/></svg>Settings</a>
+</nav>
+
+<div class="toast-wrap" id="toasts" role="status" aria-live="polite"></div>
+<div id="modal-root"></div>
+<script src="/app.js"></script>
+</body>
+</html>
