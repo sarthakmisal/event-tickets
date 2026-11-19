@@ -20,7 +20,8 @@
     "typecheck": "npm run typecheck -ws --if-present",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test": "npm run test -ws --if-present"
+    "test": "npm run test -ws --if-present",
+    "wa:test": "npm run wa:test -w @et/api --"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",

@@ -1,3 +1,4 @@
+import { pathToFileURL } from 'node:url';
 import bcrypt from 'bcryptjs';
 import { randomBytes } from 'node:crypto';
 import { rupeesToPaise, splitCommission } from '@et/shared';
@@ -103,7 +104,7 @@ export async function seed(
 }
 
 // CLI: `npm run db:seed`
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const env = loadEnv();
   const db = createDb(env.DATABASE_URL);
   try {

@@ -21,6 +21,10 @@ export default defineConfig(({ mode }) => {
     ],
     define: { __DEMO__: JSON.stringify(demo) },
     build: { outDir: demo ? 'dist-demo' : 'dist', target: 'es2022' },
-    server: { port: 5173, proxy: { '/api': 'http://localhost:3000' } },
+    server: {
+      port: 5173,
+      // 127.0.0.1 (not localhost): on Windows/Node 18+ localhost can resolve to ::1 and the proxy fails.
+      proxy: { '/api': process.env.API_PROXY_TARGET ?? 'http://127.0.0.1:3000' },
+    },
   };
 });

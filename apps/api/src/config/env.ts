@@ -17,7 +17,13 @@ const schema = z
     RAZORPAY_KEY_ID: z.string().optional(),
     RAZORPAY_KEY_SECRET: z.string().optional(),
     RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
-    WHATSAPP_PROVIDER: z.enum(['console']).default('console'),
+    WHATSAPP_PROVIDER: z.enum(['console', 'cloud-api']).default('console'),
+    WHATSAPP_TOKEN: z.string().optional(),
+    WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),
+    WHATSAPP_COUNTRY_CODE: z
+      .string()
+      .regex(/^\d{1,3}$/)
+      .default('91'),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV === 'production' && env.PAYMENT_PROVIDER === 'mock') {
@@ -26,6 +32,16 @@ const schema = z
         path: ['PAYMENT_PROVIDER'],
         message: 'mock is not allowed in production',
       });
+    }
+    if (env.WHATSAPP_PROVIDER === 'cloud-api') {
+      for (const key of ['WHATSAPP_TOKEN', 'WHATSAPP_PHONE_NUMBER_ID'] as const) {
+        if (!env[key])
+          ctx.addIssue({
+            code: 'custom',
+            path: [key],
+            message: 'required when WHATSAPP_PROVIDER=cloud-api',
+          });
+      }
     }
     if (env.PAYMENT_PROVIDER === 'razorpay') {
       for (const key of [

@@ -2,7 +2,7 @@ import { MESSAGE_STATUSES } from '@et/shared';
 import { MessageStatusPill } from '../../components/status';
 import { Button, Empty, LoadState, PageHead, useToast } from '../../components/ui';
 import { api } from '../../lib/api';
-import { fmtDateTime } from '../../lib/format';
+import { fmtDateTime, whatsappLink } from '../../lib/format';
 import { errorMessage, useQuery } from '../../lib/hooks';
 
 export function MessagesPage() {
@@ -27,7 +27,7 @@ export function MessagesPage() {
       <PageHead
         eyebrow="Customers"
         title="WhatsApp messages"
-        sub="Ticket confirmations go out automatically after payment. Failed ones retry with a growing delay; you can also resend."
+        sub="Ticket confirmations are queued after payment. Until a WhatsApp API is connected, press “Open in WhatsApp” to send one yourself."
       />
       <div className="seg" style={{ alignSelf: 'flex-start' }}>
         {MESSAGE_STATUSES.filter((s) => s !== 'SENDING').map((s) => (
@@ -55,7 +55,7 @@ export function MessagesPage() {
                 {messages.data.map((m) => (
                   <tr key={m.id}>
                     <td data-label="To" className="num">
-                      +{m.toPhone}
+                      +91 {m.toPhone}
                     </td>
                     <td className="full" style={{ maxWidth: 380 }}>
                       <span
@@ -80,6 +80,14 @@ export function MessagesPage() {
                     <td data-label="When">{fmtDateTime(m.sentAt ?? m.createdAt)}</td>
                     <td className="r">
                       <div className="row-actions">
+                        <a
+                          className="btn sm"
+                          href={whatsappLink(m.toPhone, m.body)}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Open in WhatsApp
+                        </a>
                         {(m.status === 'FAILED' || m.status === 'SENT') && (
                           <Button size="sm" onClick={() => void resend(m.id)}>
                             Resend

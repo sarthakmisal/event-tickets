@@ -35,3 +35,7 @@ export const fromLocalInput = (value: string) => new Date(`${value}:00+05:30`).t
 
 export const percent = (part: number, whole: number) =>
   whole === 0 ? 0 : Math.min(100, Math.round((part / whole) * 100));
+
+/** Free "click to chat" link: opens WhatsApp (Web/app) with the message pre-filled; the sender just presses send. */
+export const whatsappLink = (phone10: string, text: string) =>
+  `https://wa.me/91${phone10}?text=${encodeURIComponent(text)}`;

@@ -17,7 +17,8 @@ export async function migrateToLatest(db: Db): Promise<string[]> {
 }
 
 // CLI: `npm run db:migrate`
-if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {  const { loadEnv } = await import('../config/env');
+if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
+  const { loadEnv } = await import('../config/env');
   const { createDb } = await import('./client');
   const db = createDb(loadEnv().DATABASE_URL);
   try {

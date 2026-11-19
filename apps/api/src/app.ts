@@ -7,7 +7,7 @@ import type { Db } from './db/schema';
 import { createMockGateway } from './integrations/payments/mock.gateway';
 import { createRazorpayGateway } from './integrations/payments/razorpay.gateway';
 import type { PaymentGateway } from './integrations/payments/gateway';
-import { createConsoleProvider } from './integrations/whatsapp/console.provider';
+import { createWhatsAppProvider } from './integrations/whatsapp';
 import type { WhatsAppProvider } from './integrations/whatsapp/provider';
 import type { Job } from './jobs/scheduler';
 import { createAuthRouter } from './modules/auth/auth.controller';
@@ -66,7 +66,7 @@ export function buildApp({ env, db, log, clock = systemClock, ...overrides }: Ap
           webhookSecret: env.RAZORPAY_WEBHOOK_SECRET ?? '',
         })
       : mock);
-  const whatsapp = overrides.whatsapp ?? createConsoleProvider(log);
+  const whatsapp = overrides.whatsapp ?? createWhatsAppProvider(env, log);
 
   const auth = createAuthService(usersRepository(db), {
     secret: env.APP_SECRET,

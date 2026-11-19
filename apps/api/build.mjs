@@ -1,5 +1,6 @@
 // Bundles the API (and the workspace-only @et/shared source) into one file; real dependencies stay external.
 import { readFileSync } from 'node:fs';
+import { URL } from 'node:url';
 import { build } from 'esbuild';
 
 const { dependencies } = JSON.parse(

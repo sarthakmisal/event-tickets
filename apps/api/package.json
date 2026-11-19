@@ -9,6 +9,7 @@
     "start": "node dist/main.js",
     "db:migrate": "tsx --env-file-if-exists=../../.env src/db/migrate.ts",
     "db:seed": "tsx --env-file-if-exists=../../.env src/db/seed.ts",
+    "wa:test": "tsx --env-file-if-exists=../../.env src/scripts/whatsapp-test.ts",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run"
   },
