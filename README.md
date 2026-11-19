@@ -1,58 +1,62 @@
-# Event Tickets: organiser panel
+# Event Tickets
 
-Express + PostgreSQL backend with the responsive organiser panel (dashboard, events, team, settings, gate scanner).
+Multi-organiser event ticketing: the **platform owner** appoints **organisers**, organisers run **events**, customers **book and pay**, and **gate staff** scan a per-person QR for **entry and exit**. Ticket confirmations go out on WhatsApp.
 
-## Run
-
-```bash
-npm install
-cp .env.example .env          # fill DATABASE_URL and APP_SECRET (loaded automatically)
-npm run db:migrate            # creates tables (idempotent)
-npm run db:seed               # optional demo data; prints one-time passwords
-npm start                     # http://localhost:3000
-npm test                      # needs a Postgres database, see TEST_DATABASE_URL below
-```
-
-Tests use `TEST_DATABASE_URL` (default `postgres://evt:evt@localhost:5432/event_tickets_test`) and **truncate its tables**. Never point it at real data.
+Design, diagrams and decisions: [`docs/DESIGN.md`](docs/DESIGN.md).
 
 ## Layout
 
-| Path | What |
-|---|---|
-| `db/schema.sql` | organisers, users, events, bookings, payouts |
-| `src/routes/*.js` | auth, admin (overview + events), team, settings, scan, public, webhooks |
-| `src/whatsapp.js` | kwskit adapter and template renderer |
-| `public/` | the panel (`index.html`, `app.css`, `app.js`), served by Express |
+| Path              | What                                                                                                                  |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `packages/shared` | Business rules used by both API and UI: commission split, gate state machine, capacity, validation schemas, DTO types |
+| `apps/api`        | Express + Kysely + PostgreSQL. Tests run against a real database                                                      |
+| `apps/web`        | React panel (owner, organiser, gate) and customer booking pages                                                       |
 
-## API summary
+## Run it
 
-Admin (cookie session, header `X-Requested-With: fetch` on writes):
+Needs Node 20+ and PostgreSQL 14+.
 
-- `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/me`
-- `GET /api/overview`, `GET|POST /api/events`, `GET|PATCH|DELETE /api/events/:slug`, `GET /api/events/:slug/qr.png`
-- `GET|POST /api/team`, `PATCH /api/team/:id`, `POST /api/team/:id/password`
-- `GET /api/settings`, `PUT /api/settings/{delivery|contact|api-key}`, `GET /api/settings/wa-status`, `POST /api/settings/test-message`
-- `POST /api/scan` (admin and gate staff)
+```bash
+npm install
+cp .env.example .env            # set DATABASE_URL and APP_SECRET (32+ random chars)
+npm run db:migrate
+npm run db:seed                 # prints the sign-in details once
+npm run dev:api                 # http://localhost:3000
+npm run dev:web                 # http://localhost:5173 (proxies /api to :3000)
+```
 
-Public (no login), for your booking page:
+Sign in with the phone numbers the seed prints (owner `7498605559`, organiser `9000000001`, gate staff `9000000002`). Customers book at `/e`.
 
-- `GET /api/public/events/:slug`, `POST /api/public/events/:slug/bookings`
-- `GET /api/public/tickets/:code`, `GET /api/public/tickets/:code/qr.png`
+`PAYMENT_PROVIDER=mock` (default outside production) shows a test checkout, so everything works without a Razorpay account. `WHATSAPP_PROVIDER=console` prints messages to the API log.
 
-Payment confirmation:
+## Demo without a database
 
-- `POST /api/webhooks/payment` with `x-signature: hex(HMAC_SHA256(rawBody, PAYMENT_WEBHOOK_SECRET))` and body `{ "bookingCode", "paymentRef", "amount" }`. Idempotent. Marks the booking paid and, if auto-send is on, sends the WhatsApp ticket.
+```bash
+npm run build:demo        # -> apps/web/dist-demo/index.html, one self-contained file
+```
 
-## Things you must wire yourself
+Open it in any browser. It runs the same UI on an in-memory API that reuses the real business rules (same validation, commission split, seat limits, gate state machine and error messages). A control dock lets you switch role, jump the clock to expire seat holds, and make WhatsApp fail to see retries. Data resets on refresh.
 
-1. **Payment gateway.** Bookings are created as `pending`. Call the webhook above from your gateway's success callback (or adapt `src/routes/webhooks.js` to the gateway's own signature scheme, for example Razorpay).
-2. **kwskit.** `src/whatsapp.js` posts to `KWSKIT_BASE_URL + /messages`. Adjust the path and body to your kwskit docs. Until `KWSKIT_BASE_URL` is set, test messages return a clear 503.
-3. **Public booking page** (`/e/:slug`) and **ticket page** (`/t/:code`) are not part of this panel. The QR codes and WhatsApp links point to them.
+## Scripts
 
-## Behaviour worth knowing
+| Command                                                 |                                                                         |
+| ------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `npm test`                                              | Shared unit tests + API integration tests (needs PostgreSQL, see below) |
+| `npm run typecheck` / `npm run lint` / `npm run format` |                                                                         |
+| `npm run build`                                         | API bundle (`apps/api/dist/main.js`) + web (`apps/web/dist`)            |
 
-- Capacity: paid tickets plus pending bookings from the last 30 minutes count against capacity; the event row is locked during booking, so concurrent buyers cannot oversell.
-- Check-in is one atomic `UPDATE`, so two phones scanning the same ticket cannot both pass.
-- Disabling a member or changing their password ends their live sessions immediately.
-- Camera scanning uses the browser `BarcodeDetector` API (Chrome/Android). Other browsers fall back to typing the code.
-- Login failures are rate limited (10 per 15 minutes per IP); set `TRUST_PROXY` behind a proxy so the real IP is used.
+API tests use `TEST_DATABASE_URL` (default `postgres://evt:evt@localhost:5432/event_tickets_test`). **They drop and recreate the `public` schema of that database**, so never point it at real data.
+
+## Going live
+
+1. `NODE_ENV=production`, strong `APP_SECRET`, `TRUST_PROXY=1` behind a proxy, `PUBLIC_WEB_URL` set to your site.
+2. `PAYMENT_PROVIDER=razorpay` with `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` (the app refuses to start in production with the mock provider).
+3. In the Razorpay dashboard add a webhook to `https://<your-domain>/api/webhooks/razorpay` for the `payment.captured` event, using the same secret.
+4. Serve the web build and the API **on the same domain** (e.g. nginx: `/` static, `/api` proxied to the API). Sessions are same-site cookies.
+5. Run `npm run db:migrate`, then `node apps/api/dist/main.js`. The process also runs the hold-expiry and WhatsApp jobs; run a single instance, or set `ENABLE_JOBS=false` on extra ones.
+
+## What is intentionally not built yet
+
+- **Payout split / settlement.** Each paid booking stores the platform fee and organiser share; actually paying organisers is manual for now.
+- **Real WhatsApp sending.** Messages are queued, retried and tracked; only the `console` provider exists. Add an adapter in `apps/api/src/integrations/whatsapp/` implementing `WhatsAppProvider` (the unofficial gateway now, the official Cloud API later) and select it in `app.ts`.
+- **Refunds.** Cancelled events and late payments with no seat left are flagged `needsRefund`; the refund itself is done in Razorpay.

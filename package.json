@@ -1,28 +1,32 @@
 {
   "name": "event-tickets",
-  "version": "1.0.0",
   "private": true,
-  "description": "Organiser panel for event ticketing: Express + PostgreSQL",
-  "main": "src/server.js",
-  "scripts": {
-    "start": "node src/server.js",
-    "dev": "node --watch src/server.js",
-    "db:migrate": "node db/migrate.js",
-    "db:seed": "node db/seed.js",
-    "test": "node --test \"test/*.test.js\""
-  },
+  "version": "1.0.0",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
-  "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "cookie-parser": "^1.4.6",
-    "dotenv": "^16.6.1",
-    "express": "^4.19.2",
-    "express-rate-limit": "^7.4.0",
-    "helmet": "^7.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "pg": "^8.12.0",
-    "qrcode": "^1.5.4"
+  "scripts": {
+    "dev:api": "npm run dev -w @et/api",
+    "dev:web": "npm run dev -w @et/web",
+    "build": "npm run build -w @et/api && npm run build -w @et/web",
+    "build:demo": "npm run build:demo -w @et/web",
+    "db:migrate": "npm run db:migrate -w @et/api",
+    "db:seed": "npm run db:seed -w @et/api",
+    "typecheck": "npm run typecheck -ws --if-present",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "npm run test -ws --if-present"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "eslint": "^9.15.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.15.0"
   }
 }

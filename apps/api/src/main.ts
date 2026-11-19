@@ -1,0 +1,25 @@
+import { buildApp } from './app';
+import { loadEnv } from './config/env';
+import { createDb } from './db/client';
+import { startJobs } from './jobs/scheduler';
+import { createLogger } from './shared/logger';
+
+const env = loadEnv();
+const log = createLogger(env.NODE_ENV === 'production' ? 'info' : 'debug');
+const db = createDb(env.DATABASE_URL);
+const { app, jobs } = buildApp({ env, db, log });
+
+const server = app.listen(env.PORT, () => log.info(`API listening on :${env.PORT}`));
+const stopJobs = env.ENABLE_JOBS ? startJobs(jobs, log) : () => undefined;
+
+async function shutdown(signal: string) {
+  log.info({ signal }, 'shutting down');
+  stopJobs();
+  server.close(async () => {
+    await db.destroy();
+    process.exit(0);
+  });
+  setTimeout(() => process.exit(1), 10_000).unref();
+}
+process.on('SIGTERM', () => void shutdown('SIGTERM'));
+process.on('SIGINT', () => void shutdown('SIGINT'));
