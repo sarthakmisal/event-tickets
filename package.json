@@ -13,6 +13,7 @@
   "scripts": {
     "dev:api": "npm run dev -w @et/api",
     "dev:web": "npm run dev -w @et/web",
+    "start": "node scripts/start.mjs",
     "build": "npm run build -w @et/api && npm run build -w @et/web",
     "build:demo": "npm run build:demo -w @et/web",
     "db:migrate": "npm run db:migrate -w @et/api",
