@@ -35,6 +35,7 @@ import { usersRepository } from './modules/users/users.repository';
 import type { Clock } from './shared/clock';
 import { systemClock } from './shared/clock';
 import { createErrorHandler, notFoundHandler, requireCsrfHeader } from './shared/http';
+import { serveWeb } from './shared/web';
 import type { Logger } from './shared/logger';
 
 export interface AppDeps {
@@ -45,6 +46,8 @@ export interface AppDeps {
   /** Test seams: override the real integrations. */
   gateway?: PaymentGateway;
   whatsapp?: WhatsAppProvider;
+  /** Built React panel (apps/web/dist). When set, the API serves it too: one process, one URL. */
+  webDist?: string;
 }
 
 export interface BuiltApp {
@@ -54,7 +57,14 @@ export interface BuiltApp {
 }
 
 /** Composition root: wires repositories -> services -> controllers. No business logic here. */
-export function buildApp({ env, db, log, clock = systemClock, ...overrides }: AppDeps): BuiltApp {
+export function buildApp({
+  env,
+  db,
+  log,
+  clock = systemClock,
+  webDist,
+  ...overrides
+}: AppDeps): BuiltApp {
   const isProd = env.NODE_ENV === 'production';
   const mock = createMockGateway(env.APP_SECRET);
   const gateway =
@@ -81,7 +91,23 @@ export function buildApp({ env, db, log, clock = systemClock, ...overrides }: Ap
   const app = express();
   app.disable('x-powered-by');
   app.set('trust proxy', env.TRUST_PROXY);
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+          // Razorpay Checkout loads a script, an iframe and a few beacons from its own domains.
+          'script-src': ["'self'", 'https://checkout.razorpay.com'],
+          'frame-src': ['https://api.razorpay.com', 'https://checkout.razorpay.com'],
+          'connect-src': ["'self'", 'https://api.razorpay.com', 'https://lumberjack.razorpay.com'],
+          'img-src': ["'self'", 'data:', 'https://*.razorpay.com'],
+          'form-action': ["'self'", 'https://api.razorpay.com'],
+          // Only force https when the public site is https (it breaks plain-http localhost).
+          'upgrade-insecure-requests': env.PUBLIC_WEB_URL.startsWith('https:') ? [] : null,
+        },
+      },
+    }),
+  );
   app.get('/healthz', (_req, res) => res.json({ ok: true }));
 
   // Webhooks first: they need the raw body and carry their own signature auth (no CSRF header).
@@ -114,6 +140,7 @@ export function buildApp({ env, db, log, clock = systemClock, ...overrides }: Ap
   protectedApi.use('/gate', createGateRouter(createGateService(db, clock)));
   app.use('/api', protectedApi);
 
+  if (webDist) serveWeb(app, webDist);
   app.use(notFoundHandler);
   app.use(createErrorHandler(log));
 

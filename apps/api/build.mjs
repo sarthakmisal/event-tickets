@@ -8,8 +8,8 @@ const { dependencies } = JSON.parse(
 );
 
 await build({
-  entryPoints: ['src/main.ts'],
-  outfile: 'dist/main.js',
+  entryPoints: { main: 'src/main.ts', migrate: 'src/db/migrate.ts' },
+  outdir: 'dist',
   bundle: true,
   platform: 'node',
   format: 'esm',

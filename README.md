@@ -39,21 +39,27 @@ Open it in any browser. It runs the same UI on an in-memory API that reuses the 
 
 ## Scripts
 
-| Command                                                 |                                                                         |
-| ------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `npm test`                                              | Shared unit tests + API integration tests (needs PostgreSQL, see below) |
-| `npm run typecheck` / `npm run lint` / `npm run format` |                                                                         |
-| `npm run build`                                         | API bundle (`apps/api/dist/main.js`) + web (`apps/web/dist`)            |
+| Command                                                 |                                                                              |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `npm test`                                              | Shared unit tests + API integration tests (needs PostgreSQL, see below)      |
+| `npm run typecheck` / `npm run lint` / `npm run format` |                                                                              |
+| `npm start`                                             | Dev: API + web together. With `NODE_ENV=production`: migrate + run built app |
+| `npm run build`                                         | API bundle (`apps/api/dist`) + web (`apps/web/dist`)                         |
+| `npm run start:prod`                                    | Production mode locally (after `npm run build`)                              |
 
 API tests use `TEST_DATABASE_URL` (default `postgres://evt:evt@localhost:5432/event_tickets_test`). **They drop and recreate the `public` schema of that database**, so never point it at real data.
 
-## Going live
+## Going live (one project, one process)
 
-1. `NODE_ENV=production`, strong `APP_SECRET`, `TRUST_PROXY=1` behind a proxy, `PUBLIC_WEB_URL` set to your site.
-2. `PAYMENT_PROVIDER=razorpay` with `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` (the app refuses to start in production with the mock provider).
-3. In the Razorpay dashboard add a webhook to `https://<your-domain>/api/webhooks/razorpay` for the `payment.captured` event, using the same secret.
-4. Serve the web build and the API **on the same domain** (e.g. nginx: `/` static, `/api` proxied to the API). Sessions are same-site cookies.
-5. Run `npm run db:migrate`, then `node apps/api/dist/main.js`. The process also runs the hold-expiry and WhatsApp jobs; run a single instance, or set `ENABLE_JOBS=false` on extra ones.
+The API serves the built web panel too, so the whole product is a single Node service on one URL.
+
+1. Host settings: **Build** `npm install --include=dev && npm run build` · **Start** `npm start` · **Health check** `/healthz`.
+2. Environment: `NODE_ENV=production`, `DATABASE_URL` (Neon), strong `APP_SECRET` (32+ chars), `PUBLIC_WEB_URL=https://<your-domain>`, `TRUST_PROXY=1`, `PAYMENT_PROVIDER=razorpay` with `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` (the app refuses to start in production with the mock provider), optional `SEED_PASSWORD`.
+3. `npm start` in production applies pending DB migrations, then starts the server. The first time, run `npm run db:seed` once (or create your owner row) to get a login.
+4. In the Razorpay dashboard add a webhook to `https://<your-domain>/api/webhooks/razorpay` for `payment.captured`, using the same secret.
+5. Run a single instance (it also runs the hold-expiry and WhatsApp jobs), or set `ENABLE_JOBS=false` on extra ones.
+
+Try it locally first: `npm run build` then `npm run start:prod` (reads `.env`, serves everything on `http://localhost:3000`).
 
 ## What is intentionally not built yet
 
