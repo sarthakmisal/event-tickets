@@ -17,7 +17,10 @@ const schema = z
     RAZORPAY_KEY_ID: z.string().optional(),
     RAZORPAY_KEY_SECRET: z.string().optional(),
     RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
-    WHATSAPP_PROVIDER: z.enum(['console', 'cloud-api']).default('console'),
+    WHATSAPP_PROVIDER: z.enum(['console', 'cloud-api', 'qr']).default('console'),
+    /** qr only: pause between messages, and the per-number daily cap. */
+    WHATSAPP_MIN_GAP_SECONDS: z.coerce.number().min(0).default(5),
+    WHATSAPP_DAILY_LIMIT: z.coerce.number().int().positive().default(200),
     WHATSAPP_TOKEN: z.string().optional(),
     WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),
     WHATSAPP_COUNTRY_CODE: z

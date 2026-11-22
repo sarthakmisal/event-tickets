@@ -140,3 +140,52 @@ select {
     bottom: 92px;
   }
 }
+
+/* WhatsApp link card */
+.wa-card .card-head p.hint {
+  margin-top: 4px;
+  max-width: 62ch;
+}
+.wa-card .wa-pad,
+.wa-card .wa-qr,
+.wa-card .wa-test,
+.wa-card .wa-actions {
+  margin: 0;
+  padding: 16px 22px 0;
+}
+.wa-card .wa-actions {
+  padding-bottom: 18px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.wa-card .wa-qr {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.wa-card .wa-qr img {
+  background: #fff;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+.wa-card .wa-steps {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 6px;
+  max-width: 34ch;
+  color: var(--muted);
+  font-size: 14px;
+}
+.wa-card .wa-test {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.wa-card .wa-test input {
+  min-width: 220px;
+}

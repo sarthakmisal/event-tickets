@@ -12,6 +12,15 @@ export function createDb(connectionString: string): Db {
     ssl: /sslmode=require|neon\.tech/.test(connectionString)
       ? { rejectUnauthorized: true }
       : undefined,
+    // Serverless Postgres (Neon) drops idle connections; retire ours first and keep the rest alive.
+    idleTimeoutMillis: 10_000,
+    keepAlive: true,
+  });
+  // An idle client being reset must not crash the process; the pool discards it and reconnects on demand.
+  pool.on('error', (err) => {
+    console.warn(
+      JSON.stringify({ level: 40, msg: 'idle database connection dropped', err: err.message }),
+    );
   });
   return new Kysely<Database>({ dialect: new PostgresDialect({ pool }) });
 }

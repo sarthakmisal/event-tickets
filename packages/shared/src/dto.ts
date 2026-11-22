@@ -90,6 +90,23 @@ export interface MessageDto {
   sentAt: IsoDate | null;
 }
 
+export type WhatsAppConnectionState = 'DISCONNECTED' | 'CONNECTING' | 'QR' | 'CONNECTED';
+
+/** Linked-number status for the signed-in owner (platform number) or organiser (their own). */
+export interface WhatsAppStatusDto {
+  /** False when the server is not running the QR sender; the panel hides the card. */
+  supported: boolean;
+  scope: 'PLATFORM' | 'ORGANISER';
+  state: WhatsAppConnectionState;
+  /** Raw QR string to render while state is QR. */
+  qr: string | null;
+  phone: string | null;
+  /** Why the last connection attempt ended (shown to the user), if it did. */
+  error: string | null;
+  /** Organisers only: true when the platform number will send for them until they link their own. */
+  fallbackConnected: boolean;
+}
+
 export interface ScanResultDto {
   ok: boolean;
   mode: ScanMode;

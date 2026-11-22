@@ -12,16 +12,21 @@ const db = createDb(env.DATABASE_URL);
 // apps/web/dist sits two levels up from both src/main.ts and dist/main.js.
 const webDir = fileURLToPath(new URL('../../web/dist', import.meta.url));
 const webDist = hasWebBuild(webDir) ? webDir : undefined;
-const { app, jobs } = buildApp({ env, db, log, webDist });
+const { app, jobs, whatsappQr } = buildApp({ env, db, log, webDist });
 
 const server = app.listen(env.PORT, () =>
   log.info(`Listening on :${env.PORT}${webDist ? ' (API + web panel)' : ' (API only)'}`),
 );
 const stopJobs = env.ENABLE_JOBS ? startJobs(jobs, log) : () => undefined;
+// Reconnect numbers that were linked before this restart (no QR needed again).
+whatsappQr?.startSaved().catch((err: unknown) => {
+  log.error({ err }, 'could not restore saved WhatsApp sessions');
+});
 
 async function shutdown(signal: string) {
   log.info({ signal }, 'shutting down');
   stopJobs();
+  whatsappQr?.stopAll();
   server.close(async () => {
     await db.destroy();
     process.exit(0);

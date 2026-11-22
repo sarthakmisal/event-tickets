@@ -10,6 +10,7 @@ import { migrateToLatest } from '../src/db/migrate';
 import { seed } from '../src/db/seed';
 import type { Db } from '../src/db/schema';
 import type { Job } from '../src/jobs/scheduler';
+import type { QrWhatsApp } from '../src/integrations/whatsapp/qr/manager';
 import { createLogger } from '../src/shared/logger';
 
 export const PASSWORD = 'Passw0rd!!';
@@ -22,6 +23,8 @@ export interface TestCtx {
   db: Db;
   env: Env;
   jobs: Record<string, Job>;
+  /** Set when the app runs with WHATSAPP_PROVIDER=qr. */
+  whatsappQr: QrWhatsApp | null;
   /** Messages the fake WhatsApp provider delivered. */
   sent: { toPhone: string; body: string }[];
   /** Make the next N WhatsApp sends fail. */
@@ -60,7 +63,7 @@ export async function setup(
   let offset = 0;
   let failures = 0;
   const sent: TestCtx['sent'] = [];
-  const { app, jobs } = buildApp({
+  const { app, jobs, whatsappQr } = buildApp({
     env,
     db,
     log: createLogger('silent'),
@@ -82,6 +85,7 @@ export async function setup(
     db,
     env,
     jobs: Object.fromEntries(jobs.map((j) => [j.name, j])),
+    whatsappQr,
     sent,
     failSends: (n) => {
       failures = n;

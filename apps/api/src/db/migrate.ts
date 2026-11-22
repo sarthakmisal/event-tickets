@@ -2,11 +2,14 @@ import { pathToFileURL } from 'node:url';
 import { Migrator } from 'kysely';
 import type { Db } from './schema';
 import * as init from './migrations/001_init';
+import * as whatsappSessions from './migrations/002_whatsapp_sessions';
 
 export function createMigrator(db: Db): Migrator {
   return new Migrator({
     db,
-    provider: { getMigrations: async () => ({ '001_init': init }) },
+    provider: {
+      getMigrations: async () => ({ '001_init': init, '002_whatsapp_sessions': whatsappSessions }),
+    },
   });
 }
 

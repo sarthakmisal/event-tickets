@@ -1,5 +1,6 @@
 // `npm start`
-//   development (default): API (:3000) + web panel (:5173) with live reload. Ctrl+C stops both.
+//   development (default): applies DB migrations, then API (:3000) + web panel (:5173) with live reload.
+//   Ctrl+C stops both.
 //   production (NODE_ENV=production, or `npm run start:prod`): applies DB migrations, then runs the
 //   built API, which also serves the built web panel — one process, one URL. Run `npm run build` first.
 import { spawn, spawnSync } from 'node:child_process';
@@ -29,6 +30,12 @@ if (production) {
   for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => server.kill(signal));
   server.on('exit', (code) => process.exit(code ?? 0));
 } else {
+  // Keep the database in step with the code (already-applied migrations are skipped).
+  const migrate = spawnSync('npm run db:migrate', { stdio: 'inherit', shell: true });
+  if (migrate.status !== 0) {
+    console.error('Database migration failed. Check DATABASE_URL in .env and try again.');
+    process.exit(migrate.status ?? 1);
+  }
   const children = ['dev:api', 'dev:web'].map((script) =>
     spawn('npm', ['run', script], { stdio: 'inherit', shell: true }),
   );

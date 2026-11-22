@@ -1,5 +1,6 @@
 import type { MessageDto } from '@et/shared';
 import type { Db } from '../../db/schema';
+import { WhatsAppUnavailableError } from '../../integrations/whatsapp/provider';
 import type { WhatsAppProvider } from '../../integrations/whatsapp/provider';
 import type { Clock } from '../../shared/clock';
 import { notFound } from '../../shared/errors';
@@ -11,6 +12,7 @@ import type { MessageRow } from './messages.repository';
 
 export const MAX_ATTEMPTS = 5;
 const BATCH_SIZE = 20;
+const UNAVAILABLE_RETRY_MS = 60_000;
 const backoffMs = (attempt: number) => 2 ** attempt * 60_000;
 
 const toDto = (m: MessageRow): MessageDto => ({
@@ -40,9 +42,20 @@ export function createMessagingService(
       const claimed = await repo.claimDue(clock(), BATCH_SIZE);
       for (const message of claimed) {
         try {
-          await provider.send({ toPhone: message.to_phone, body: message.body });
+          const senderKey = await repo.organiserIdOf(message.booking_id);
+          await provider.send({ toPhone: message.to_phone, body: message.body, senderKey });
           await repo.markSent(message.id, clock());
         } catch (err) {
+          if (err instanceof WhatsAppUnavailableError) {
+            // Not the message's fault (number not linked, daily cap): keep it queued, spend no attempt.
+            await repo.markAttemptFailed(message.id, {
+              attempts: message.attempts,
+              status: 'QUEUED',
+              nextAttemptAt: new Date(clock().getTime() + UNAVAILABLE_RETRY_MS),
+              error: err.message,
+            });
+            continue;
+          }
           const attempts = message.attempts + 1;
           const exhausted = attempts >= MAX_ATTEMPTS;
           log.warn({ err, messageId: message.id, attempts }, 'whatsapp send failed');

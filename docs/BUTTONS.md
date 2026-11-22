@@ -19,30 +19,34 @@ Roles: **Owner** (platform), **Organiser** (runs events), **Gate staff** (scans)
 
 ## Owner
 
-| Where      | Button                                                         | What happens                                                                      |
-| ---------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| Sidebar    | Dashboard, Organisers, Events, Gate scan, Gate staff, WhatsApp | Opens that page                                                                   |
-| Sidebar    | Theme / Sign out                                               | Light-dark switch / ends the session                                              |
-| Organisers | **Appoint organiser**                                          | Creates an organiser and their login (name, phone, commission %, email, password) |
-| Organisers | **Commission**                                                 | Changes the % for future events (existing events keep their rate)                 |
-| Organisers | **Disable / Enable**                                           | Blocks or restores that organiser's login                                         |
-| Events     | (no New event button)                                          | Owners view events; organisers create them                                        |
-| WhatsApp   | Open in WhatsApp / Resend                                      | See Organiser                                                                     |
+| Where      | Button                                                         | What happens                                                                                                      |
+| ---------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Sidebar    | Dashboard, Organisers, Events, Gate scan, Gate staff, WhatsApp | Opens that page                                                                                                   |
+| Sidebar    | Theme / Sign out                                               | Light-dark switch / ends the session                                                                              |
+| Organisers | **Appoint organiser**                                          | Creates an organiser and their login (name, phone, commission %, email, password)                                 |
+| Organisers | **Commission**                                                 | Changes the % for future events (existing events keep their rate)                                                 |
+| Organisers | **Disable / Enable**                                           | Blocks or restores that organiser's login                                                                         |
+| Events     | (no New event button)                                          | Owners view events; organisers create them                                                                        |
+| WhatsApp   | **Connect WhatsApp** / **Send test** / **Disconnect**          | Links the platform number by QR (needs `WHATSAPP_PROVIDER=qr`). Used when an organiser has no number of their own |
+| WhatsApp   | Open in WhatsApp / Resend                                      | See Organiser                                                                                                     |
 
 ## Organiser
 
-| Where      | Button                                                        | What happens                                                                         |
-| ---------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| Events     | **New event**                                                 | Creates a **draft** (title, venue, start, price, capacity). Not visible to customers |
-| Event page | **Edit**                                                      | Changes details. Capacity cannot go below seats already taken                        |
-| Event page | **Publish**                                                   | Makes the booking link live                                                          |
-| Event page | **Unpublish**                                                 | Back to draft. Only available while no ticket is sold                                |
-| Event page | **Cancel event** then **Cancel event** (confirm) / Keep event | Cancels all bookings and voids all tickets. Cannot be undone                         |
-| Event page | **Copy** / **Open page**                                      | Copies the booking link / opens the customer page                                    |
-| Gate staff | **Add staff**                                                 | Creates a scanner login for your events                                              |
-| Gate staff | **Disable / Enable**                                          | Blocks or restores that scanner's login                                              |
-| WhatsApp   | **Open in WhatsApp**                                          | Opens WhatsApp with the confirmation pre-filled; press Send (free, manual)           |
-| WhatsApp   | **Resend**                                                    | Puts the message back in the queue                                                   |
+| Where      | Button                                                        | What happens                                                                               |
+| ---------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Events     | **New event**                                                 | Creates a **draft** (title, venue, start, price, capacity). Not visible to customers       |
+| Event page | **Edit**                                                      | Changes details. Capacity cannot go below seats already taken                              |
+| Event page | **Publish**                                                   | Makes the booking link live                                                                |
+| Event page | **Unpublish**                                                 | Back to draft. Only available while no ticket is sold                                      |
+| Event page | **Cancel event** then **Cancel event** (confirm) / Keep event | Cancels all bookings and voids all tickets. Cannot be undone                               |
+| Event page | **Copy** / **Open page**                                      | Copies the booking link / opens the customer page                                          |
+| Gate staff | **Add staff**                                                 | Creates a scanner login for your events                                                    |
+| Gate staff | **Disable / Enable**                                          | Blocks or restores that scanner's login                                                    |
+| WhatsApp   | **Connect WhatsApp**                                          | Shows a QR. On the phone: WhatsApp, Linked devices, Link a device, scan. Becomes Connected |
+| WhatsApp   | **Send test**                                                 | Sends a test message to the 10-digit number you typed (only when Connected)                |
+| WhatsApp   | **Disconnect / Cancel**                                       | Unlinks the number (or cancels the QR); sending falls back to the platform number          |
+| WhatsApp   | **Open in WhatsApp**                                          | Opens WhatsApp with the confirmation pre-filled; press Send (free, manual)                 |
+| WhatsApp   | **Resend**                                                    | Puts the message back in the queue                                                         |
 
 ## Gate staff
 

@@ -120,6 +120,23 @@ export interface MessagesTable {
   sent_at: Date | null;
 }
 
+export interface WhatsappSessionsTable {
+  owner_key: string;
+  /** Baileys credentials, serialised with BufferJSON. */
+  creds: string;
+  registered: Generated<boolean>;
+  phone: string | null;
+  updated_at: Generated<Date>;
+}
+
+export interface WhatsappAuthKeysTable {
+  owner_key: string;
+  type: string;
+  id: string;
+  /** Serialised with BufferJSON. */
+  value: string;
+}
+
 export interface Database {
   organisers: OrganisersTable;
   users: UsersTable;
@@ -129,6 +146,8 @@ export interface Database {
   scan_logs: ScanLogsTable;
   payments: PaymentsTable;
   messages: MessagesTable;
+  whatsapp_sessions: WhatsappSessionsTable;
+  whatsapp_auth_keys: WhatsappAuthKeysTable;
 }
 
 export type Db = Kysely<Database>;

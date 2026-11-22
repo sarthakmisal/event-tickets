@@ -61,8 +61,14 @@ The API serves the built web panel too, so the whole product is a single Node se
 
 Try it locally first: `npm run build` then `npm run start:prod` (reads `.env`, serves everything on `http://localhost:3000`).
 
+## WhatsApp by QR scan (unofficial)
+
+Set `WHATSAPP_PROVIDER=qr`, run the API on an always-on server (not serverless), then open **WhatsApp** in the panel: the owner links the platform number, each organiser can link their own. An organiser's confirmations go from their number when connected, otherwise from the platform number. Sessions are stored in Postgres and resume after a restart; messages wait in the queue while no number is connected. Sends are throttled (`WHATSAPP_MIN_GAP_SECONDS`, `WHATSAPP_DAILY_LIMIT`).
+
+This uses the Baileys library, which WhatsApp does not endorse: numbers can get temporarily or permanently banned. Use a dedicated SIM, never a personal number. Move to `cloud-api` when volume grows.
+
 ## What is intentionally not built yet
 
 - **Payout split / settlement.** Each paid booking stores the platform fee and organiser share; actually paying organisers is manual for now.
-- **Real WhatsApp sending.** Messages are queued, retried and tracked; only the `console` provider exists. Add an adapter in `apps/api/src/integrations/whatsapp/` implementing `WhatsAppProvider` (the unofficial gateway now, the official Cloud API later) and select it in `app.ts`.
+- **Official-grade WhatsApp.** Providers: `console` (log), `qr` (link a number by scanning, below) and `cloud-api` (official Meta, plain text only; template messages are not built).
 - **Refunds.** Cancelled events and late payments with no seat left are flagged `needsRefund`; the refund itself is done in Razorpay.

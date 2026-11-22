@@ -11,6 +11,7 @@ import type {
   ScanResultDto,
   TicketViewDto,
   UserDto,
+  WhatsAppStatusDto,
 } from '@et/shared';
 import { ApiError } from './types';
 import type { Api, MockPayment } from './types';
@@ -100,6 +101,16 @@ export function createHttpApi(): Api {
       list: async () => (await get<{ messages: MessageDto[] }>('/api/messages')).messages,
       resend: async (id) =>
         (await post<{ message: MessageDto }>(`/api/messages/${id}/resend`)).message,
+    },
+    whatsapp: {
+      status: async () => (await get<{ whatsapp: WhatsAppStatusDto }>('/api/whatsapp')).whatsapp,
+      connect: async () =>
+        (await post<{ whatsapp: WhatsAppStatusDto }>('/api/whatsapp/connect')).whatsapp,
+      disconnect: async () =>
+        (await post<{ whatsapp: WhatsAppStatusDto }>('/api/whatsapp/disconnect')).whatsapp,
+      sendTest: async (phone) => {
+        await post('/api/whatsapp/test', { phone });
+      },
     },
     gate: {
       events: async () => (await get<{ events: EventDto[] }>('/api/gate/events')).events,

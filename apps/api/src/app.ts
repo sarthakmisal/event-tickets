@@ -8,6 +8,13 @@ import { createMockGateway } from './integrations/payments/mock.gateway';
 import { createRazorpayGateway } from './integrations/payments/razorpay.gateway';
 import type { PaymentGateway } from './integrations/payments/gateway';
 import { createWhatsAppProvider } from './integrations/whatsapp';
+import { createBaileysSocket } from './integrations/whatsapp/qr/baileys-socket';
+import { createAuthStore } from './integrations/whatsapp/qr/auth-store';
+import { createQrWhatsApp } from './integrations/whatsapp/qr/manager';
+import type { QrWhatsApp } from './integrations/whatsapp/qr/manager';
+import type { SocketFactory } from './integrations/whatsapp/qr/types';
+import { createWhatsAppRouter } from './modules/whatsapp/whatsapp.controller';
+import { createWhatsAppService } from './modules/whatsapp/whatsapp.service';
 import type { WhatsAppProvider } from './integrations/whatsapp/provider';
 import type { Job } from './jobs/scheduler';
 import { createAuthRouter } from './modules/auth/auth.controller';
@@ -46,6 +53,8 @@ export interface AppDeps {
   /** Test seams: override the real integrations. */
   gateway?: PaymentGateway;
   whatsapp?: WhatsAppProvider;
+  /** Test seam for WHATSAPP_PROVIDER=qr: replaces the real Baileys connection. */
+  whatsappSocket?: SocketFactory;
   /** Built React panel (apps/web/dist). When set, the API serves it too: one process, one URL. */
   webDist?: string;
 }
@@ -54,6 +63,8 @@ export interface BuiltApp {
   app: Express;
   /** Background work (hold expiry, WhatsApp outbox). Started by main.ts, driven directly in tests. */
   jobs: Job[];
+  /** Linked-number manager when WHATSAPP_PROVIDER=qr (main.ts resumes saved sessions and stops them). */
+  whatsappQr: QrWhatsApp | null;
 }
 
 /** Composition root: wires repositories -> services -> controllers. No business logic here. */
@@ -76,7 +87,17 @@ export function buildApp({
           webhookSecret: env.RAZORPAY_WEBHOOK_SECRET ?? '',
         })
       : mock);
-  const whatsapp = overrides.whatsapp ?? createWhatsAppProvider(env, log);
+  const whatsappQr =
+    env.WHATSAPP_PROVIDER === 'qr' && !overrides.whatsapp
+      ? createQrWhatsApp({
+          store: createAuthStore(db),
+          createSocket: overrides.whatsappSocket ?? createBaileysSocket,
+          log,
+          minGapMs: env.WHATSAPP_MIN_GAP_SECONDS * 1000,
+          dailyLimit: env.WHATSAPP_DAILY_LIMIT,
+        })
+      : null;
+  const whatsapp = overrides.whatsapp ?? whatsappQr?.provider ?? createWhatsAppProvider(env, log);
 
   const auth = createAuthService(usersRepository(db), {
     secret: env.APP_SECRET,
@@ -137,6 +158,7 @@ export function buildApp({
   protectedApi.use('/bookings', createBookingsRouter(bookings));
   protectedApi.use('/staff', createStaffRouter(createStaffService(usersRepository(db), auth)));
   protectedApi.use('/messages', createMessagesRouter(messaging));
+  protectedApi.use('/whatsapp', createWhatsAppRouter(createWhatsAppService(whatsappQr)));
   protectedApi.use('/gate', createGateRouter(createGateService(db, clock)));
   app.use('/api', protectedApi);
 
@@ -148,5 +170,5 @@ export function buildApp({
     { name: 'expire-holds', everyMs: 60_000, run: () => bookings.expireStaleHolds() },
     { name: 'whatsapp-outbox', everyMs: 10_000, run: () => messaging.processDue() },
   ];
-  return { app, jobs };
+  return { app, jobs, whatsappQr };
 }

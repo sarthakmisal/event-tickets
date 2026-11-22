@@ -4,6 +4,7 @@ import { Button, Empty, LoadState, PageHead, useToast } from '../../components/u
 import { api } from '../../lib/api';
 import { fmtDateTime, whatsappLink } from '../../lib/format';
 import { errorMessage, useQuery } from '../../lib/hooks';
+import { WhatsAppCard } from './WhatsAppCard';
 
 export function MessagesPage() {
   const toast = useToast();
@@ -27,8 +28,9 @@ export function MessagesPage() {
       <PageHead
         eyebrow="Customers"
         title="WhatsApp messages"
-        sub="Ticket confirmations are queued after payment. Until a WhatsApp API is connected, press “Open in WhatsApp” to send one yourself."
+        sub="Ticket confirmations are queued after payment. If no number is connected, press “Open in WhatsApp” to send one yourself."
       />
+      <WhatsAppCard />
       <div className="seg" style={{ alignSelf: 'flex-start' }}>
         {MESSAGE_STATUSES.filter((s) => s !== 'SENDING').map((s) => (
           <button key={s} type="button" aria-pressed="false" style={{ cursor: 'default' }}>

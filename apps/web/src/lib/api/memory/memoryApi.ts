@@ -40,6 +40,7 @@ import type {
   ScanRejection,
   TicketState,
   UserDto,
+  WhatsAppStatusDto,
 } from '@et/shared';
 import { ApiError } from '../types';
 import type { Api } from '../types';
@@ -207,6 +208,22 @@ export function createMemoryApi(): { api: Api; demo: DemoControls } {
   const bookings: Bk[] = [];
   const tickets: Tk[] = [];
   const messages: Msg[] = [];
+  const waLinks = new Map<string, { since: number; connected: boolean }>();
+  const waKey = (u: User) => u.organiserId ?? 'platform';
+  const waStatus = (u: User): WhatsAppStatusDto => {
+    const link = waLinks.get(waKey(u));
+    if (link && !link.connected && Date.now() - link.since > 4000) link.connected = true;
+    const state = !link ? 'DISCONNECTED' : link.connected ? 'CONNECTED' : 'QR';
+    return {
+      supported: true,
+      scope: u.organiserId ? 'ORGANISER' : 'PLATFORM',
+      state,
+      qr: state === 'QR' ? `DEMO-QR-${waKey(u)}-${link?.since ?? 0}` : null,
+      phone: state === 'CONNECTED' ? '919999999999' : null,
+      error: null,
+      fallbackConnected: false,
+    };
+  };
   const scans: Scan[] = [];
   const payments: Pay[] = [];
   const listeners = new Set<() => void>();
@@ -783,6 +800,31 @@ export function createMemoryApi(): { api: Api; demo: DemoControls } {
           if (u.role !== 'OWNER' && s.organiserId !== u.organiserId) return forbidden();
           s.active = active;
           return userDto(s);
+        }),
+    },
+
+    whatsapp: {
+      // Demo: connecting shows a QR for a few seconds, then "connects" a fake number. Nothing is sent.
+      status: () => call(() => waStatus(requireRole('OWNER', 'ORGANISER'))),
+      connect: () =>
+        call(() => {
+          const u = requireRole('OWNER', 'ORGANISER');
+          waLinks.set(waKey(u), { since: Date.now(), connected: false });
+          return waStatus(u);
+        }),
+      disconnect: () =>
+        call(() => {
+          const u = requireRole('OWNER', 'ORGANISER');
+          waLinks.delete(waKey(u));
+          return waStatus(u);
+        }),
+      sendTest: (phone) =>
+        call(() => {
+          const u = requireRole('OWNER', 'ORGANISER');
+          if (!waStatus(u).phone)
+            return fail(409, 'CONFLICT', 'Connect your WhatsApp number first');
+          if (!/^[6-9]\d{9}$/.test(phone))
+            return fail(400, 'VALIDATION', 'Enter a valid 10-digit mobile number', 'phone');
         }),
     },
 

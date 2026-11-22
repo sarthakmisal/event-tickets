@@ -20,6 +20,7 @@ import type {
   UpdateEventInput,
   UpdateOrganiserInput,
   UserDto,
+  WhatsAppStatusDto,
 } from '@et/shared';
 
 export class ApiError extends Error {
@@ -69,6 +70,13 @@ export interface Api {
     setActive(id: string, active: boolean): Promise<UserDto>;
   };
   messages: { list(): Promise<MessageDto[]>; resend(id: string): Promise<MessageDto> };
+  /** Link a WhatsApp number by scanning a QR (the owner's number for the platform, an organiser's own). */
+  whatsapp: {
+    status(): Promise<WhatsAppStatusDto>;
+    connect(): Promise<WhatsAppStatusDto>;
+    disconnect(): Promise<WhatsAppStatusDto>;
+    sendTest(phone: string): Promise<void>;
+  };
   gate: {
     events(): Promise<EventDto[]>;
     scan(input: ScanInput): Promise<ScanResultDto>;

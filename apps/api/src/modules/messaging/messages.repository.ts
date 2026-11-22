@@ -43,6 +43,18 @@ export const messagesRepository = (db: Executor) => ({
       .execute();
   },
 
+  /** The organiser a message belongs to (via its booking's event), or undefined for platform messages. */
+  async organiserIdOf(bookingId: string | null): Promise<string | undefined> {
+    if (!bookingId) return undefined;
+    const row = await db
+      .selectFrom('bookings as b')
+      .innerJoin('events as e', 'e.id', 'b.event_id')
+      .select('e.organiser_id')
+      .where('b.id', '=', bookingId)
+      .executeTakeFirst();
+    return row?.organiser_id;
+  },
+
   async markSent(id: string, now: Date): Promise<void> {
     await db
       .updateTable('messages')

@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@et/shared": "*",
+    "@whiskeysockets/baileys": "^7.0.0-rc14",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "express": "^5.0.1",
