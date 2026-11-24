@@ -101,6 +101,18 @@ describe('reconnecting', () => {
     expect(sockets).toHaveLength(4);
   });
 
+  it('does not fight another instance that took over the session (code 440)', async () => {
+    vi.useFakeTimers();
+    const { session, sockets } = make();
+    await session.start();
+    sockets[0]!.emit({ connection: 'open', userPhone: '911' });
+    sockets[0]!.emit({ connection: 'close', closeCode: 440 });
+    await vi.advanceTimersByTimeAsync(120_000);
+    expect(sockets).toHaveLength(1); // no reconnect attempts
+    expect(session.snapshot().state).toBe('DISCONNECTED');
+    expect(session.snapshot().error).toMatch(/another server/);
+  });
+
   it('stop() closes without logging out so the next boot can resume', async () => {
     const { session, sockets } = make();
     await session.start();

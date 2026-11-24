@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Field, Input, Pill, QrImage, useToast } from '../../components/ui';
 import { api } from '../../lib/api';
 import { errorMessage, useQuery } from '../../lib/hooks';
@@ -6,7 +6,11 @@ import { errorMessage, useQuery } from '../../lib/hooks';
 /** Link a WhatsApp number by scanning a QR, like WhatsApp Web. Hidden when the server does not offer it. */
 export function WhatsAppCard() {
   const toast = useToast();
-  const status = useQuery(() => api.whatsapp.status(), [], 2500);
+  // Poll fast only while a QR / connection is in progress; otherwise just keep the card fresh.
+  const [pollMs, setPollMs] = useState(2500);
+  const status = useQuery(() => api.whatsapp.status(), [], pollMs);
+  const live = status.data?.state === 'QR' || status.data?.state === 'CONNECTING';
+  useEffect(() => setPollMs(live ? 2500 : 15000), [live]);
   const [busy, setBusy] = useState(false);
   const [phone, setPhone] = useState('');
   const wa = status.data;

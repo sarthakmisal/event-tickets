@@ -17,6 +17,7 @@ export interface SessionOptions {
 const LOGGED_OUT = 401;
 const FORBIDDEN = 403;
 const TIMED_OUT = 408;
+const REPLACED = 440; // the same linked session was opened somewhere else
 const RESTART_REQUIRED = 515; // WhatsApp asks for a fresh socket right after the QR is scanned
 const MAX_BACKOFF_MS = 30_000;
 
@@ -173,6 +174,17 @@ export class WhatsAppSession {
       this.wanted = false;
       await this.store.clear(this.ownerKey).catch(() => undefined);
       this.reset();
+      return;
+    }
+    if (code === REPLACED) {
+      // Another copy of the app (e.g. local + a deployed server on the same database) took over this
+      // session. Reconnecting would just kick it back out, forever. Stay down and keep the link.
+      this.log.warn({ ownerKey: this.ownerKey }, 'whatsapp session taken over by another instance');
+      this.lastError =
+        'This number is connected from another server. Run the app in only one place per database';
+      this.wanted = false;
+      this.state = 'DISCONNECTED';
+      this.qr = null;
       return;
     }
     if (code === TIMED_OUT && !this.registered) {

@@ -31,11 +31,15 @@ export function useQuery<T>(fetcher: () => Promise<T>, deps: unknown[], pollMs?:
     alive.current = true;
     setLoading(true);
     run();
-    const timer = pollMs ? setInterval(run, pollMs) : undefined;
+    // Poll only while the tab is visible, and catch up as soon as it becomes visible again.
+    const timer = pollMs ? setInterval(() => !document.hidden && run(), pollMs) : undefined;
+    const onVisible = () => !document.hidden && pollMs && run();
+    document.addEventListener('visibilitychange', onVisible);
     const unsubscribe = demo?.subscribe(run);
     return () => {
       alive.current = false;
       if (timer) clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVisible);
       unsubscribe?.();
     };
   }, [...deps, pollMs]);
